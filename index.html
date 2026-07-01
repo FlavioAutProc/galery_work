@@ -1,0 +1,2599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f7fa" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Galeria · Organizador</title>
+    <style>
+        /* ============================================================
+               RESET & BASE
+               ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-elevated: #ffffff;
+            --bg-input: #f0f2f5;
+            --bg-modal: rgba(0, 0, 0, 0.4);
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8a8aaa;
+            --border-color: #e8ecf0;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --accent-glow: rgba(108, 92, 231, 0.2);
+            --success: #00b894;
+            --danger: #e17055;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            --tab-height: 64px;
+            --header-height: 60px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --fab-size: 52px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1e1e36;
+            --bg-elevated: #2a2a44;
+            --bg-input: #2a2a44;
+            --bg-modal: rgba(0, 0, 0, 0.7);
+            --text-primary: #f0f0f5;
+            --text-secondary: #b0b0d0;
+            --text-muted: #6a6a8a;
+            --border-color: #2a2a44;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --accent: #7c6cf0;
+            --accent-light: #a29bfe;
+            --accent-glow: rgba(124, 108, 240, 0.3);
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background var(--transition), color var(--transition);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-primary);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ============================================================
+               HEADER
+               ============================================================ */
+        .app-header {
+            flex-shrink: 0;
+            height: var(--header-height);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .app-header .brand {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .app-header .brand .brand-title {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .app-header .brand .brand-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .app-header .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-header .header-actions button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: var(--radius-full);
+            transition: background var(--transition), color var(--transition);
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-header .header-actions button:active {
+            background: var(--bg-input);
+        }
+
+        /* ============================================================
+               MAIN CONTENT
+               ============================================================ */
+        .main-content {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-primary);
+            transition: background var(--transition);
+        }
+
+        .page-container {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 16px calc(var(--tab-height) + 16px + var(--safe-bottom));
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .page-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               BOTTOM NAVIGATION
+               ============================================================ */
+        .bottom-nav {
+            flex-shrink: 0;
+            height: calc(var(--tab-height) + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: stretch;
+            justify-content: space-around;
+            position: relative;
+            z-index: 20;
+            transition: background var(--transition), border-color var(--transition);
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        .bottom-nav .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color var(--transition), transform 0.15s ease;
+            padding: 4px 0;
+            letter-spacing: 0.2px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+
+        .bottom-nav .nav-item .nav-icon {
+            font-size: 22px;
+            line-height: 1;
+            transition: transform 0.2s ease;
+            font-family: 'Segoe UI', 'Arial Unicode MS', sans-serif;
+        }
+
+        .bottom-nav .nav-item .nav-label {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .bottom-nav .nav-item:active {
+            transform: scale(0.92);
+        }
+
+        .bottom-nav .nav-item.active {
+            color: var(--accent);
+        }
+
+        .bottom-nav .nav-item.active .nav-icon {
+            transform: scale(1.05);
+        }
+
+        .bottom-nav .nav-item .badge {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(calc(50% + 18px));
+            background: var(--danger);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            box-shadow: 0 2px 8px rgba(225, 112, 85, 0.3);
+        }
+
+        /* Central FAB button in nav */
+        .bottom-nav .nav-fab {
+            flex: 0 0 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -18px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .bottom-nav .nav-fab button {
+            width: 54px;
+            height: 54px;
+            border-radius: var(--radius-full);
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            font-size: 30px;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-weight: 300;
+        }
+
+        .bottom-nav .nav-fab button:active {
+            transform: scale(0.90);
+        }
+
+        /* ============================================================
+               CATEGORIES PAGE - SLIDER STYLE
+               ============================================================ */
+        .category-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 12px 0;
+        }
+
+        /* Horizontal category slider */
+        .category-slider {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 4px 0 12px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            margin-bottom: 4px;
+        }
+
+        .category-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-slide {
+            flex: 0 0 160px;
+            min-height: 200px;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-card);
+            color: #fff;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .category-slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 60%);
+            z-index: 1;
+        }
+
+        .category-slide>*:not(.slide-actions) {
+            position: relative;
+            z-index: 2;
+        }
+
+        .category-slide:active {
+            transform: scale(0.97);
+        }
+
+        .category-slide.active-slide {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent), var(--shadow-md);
+        }
+
+        .category-slide .slide-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+            opacity: 0.9;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .category-slide .slide-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+            line-height: 1.2;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .category-slide .slide-count {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+            margin-top: 2px;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .category-slide .slide-actions {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            display: flex;
+            gap: 4px;
+            z-index: 3;
+        }
+
+        .category-slide .slide-actions button {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            border: none;
+            font-size: 12px;
+            padding: 2px 6px;
+            cursor: pointer;
+            border-radius: var(--radius-full);
+            color: #fff;
+            transition: background var(--transition);
+        }
+
+        .category-slide .slide-actions button:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .category-slide .slide-actions .delete-slide:active {
+            color: var(--danger);
+        }
+
+        /* Add category slide (last) */
+        .category-slide.add-slide {
+            border-style: dashed;
+            background: var(--bg-input);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            border-color: var(--border-color);
+            min-height: 80px;
+            flex: 0 0 120px;
+            color: var(--text-primary);
+            text-shadow: none;
+        }
+
+        .category-slide.add-slide::before {
+            display: none;
+        }
+
+        .category-slide.add-slide:active {
+            transform: scale(0.95);
+        }
+
+        .category-slide.add-slide .add-icon {
+            font-size: 28px;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .category-slide.add-slide .add-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Add category inline (hidden by default, shown when add slide clicked) */
+        .add-category-inline {
+            display: none;
+            gap: 8px;
+            margin: 4px 0 12px 0;
+            align-items: center;
+            padding: 0 4px;
+        }
+
+        .add-category-inline.visible {
+            display: flex;
+        }
+
+        .add-category-inline input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: var(--font);
+            transition: border-color var(--transition), background var(--transition);
+            outline: none;
+        }
+
+        .add-category-inline input:focus {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .add-category-inline button {
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background var(--transition), transform 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .add-category-inline button:active {
+            transform: scale(0.95);
+        }
+
+        /* ============================================================
+               IMAGE GRID
+               ============================================================ */
+        .category-filter-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 12px 0 10px 0;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .image-grid .grid-item {
+            position: relative;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: var(--bg-card);
+            box-shadow: var(--shadow-sm);
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .image-grid .grid-item:active {
+            transform: scale(0.97);
+        }
+
+        .image-grid .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: var(--bg-input);
+        }
+
+        .image-grid .grid-item .item-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px 10px 6px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .image-grid .grid-item .item-overlay .item-category {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-grid .grid-item .item-overlay .item-tags {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-grid .grid-item .favorite-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            font-size: 14px;
+            color: #ffd93d;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+            filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .image-grid .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 16px;
+            color: var(--text-muted);
+        }
+
+        .image-grid .empty-state .empty-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+            opacity: 0.4;
+        }
+
+        .image-grid .empty-state p {
+            font-size: 14px;
+        }
+
+        .image-grid .empty-state .empty-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+               HOME PAGE
+               ============================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            padding: 14px 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: background var(--transition);
+        }
+
+        .stat-card .stat-number {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .stat-card.accent .stat-number {
+            color: var(--accent);
+        }
+        .stat-card.success .stat-number {
+            color: var(--success);
+        }
+        .stat-card.danger .stat-number {
+            color: var(--danger);
+        }
+        .stat-card.warning .stat-number {
+            color: #fdcb6e;
+        }
+
+        /* ============================================================
+               SETTINGS
+               ============================================================ */
+        .settings-group {
+            margin-bottom: 20px;
+        }
+
+        .settings-group .settings-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 6px;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .settings-item .settings-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .settings-item .settings-left .settings-icon {
+            font-size: 18px;
+            width: 28px;
+            text-align: center;
+        }
+
+        .settings-item .settings-left .settings-info .settings-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .settings-item .settings-left .settings-info .settings-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .settings-item .settings-value {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .toggle {
+            width: 44px;
+            height: 26px;
+            border-radius: var(--radius-full);
+            background: var(--border-color);
+            cursor: pointer;
+            position: relative;
+            transition: background var(--transition);
+            flex-shrink: 0;
+            border: none;
+            padding: 0;
+        }
+
+        .toggle.active {
+            background: var(--accent);
+        }
+
+        .toggle .toggle-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            border-radius: var(--radius-full);
+            background: #fff;
+            transition: transform var(--transition), background var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle.active .toggle-thumb {
+            transform: translateX(18px);
+        }
+
+        /* ============================================================
+               MODALS
+               ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-modal);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
+        .modal-sheet {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            max-width: 480px;
+            width: 100%;
+            max-height: 90vh;
+            padding: 20px 20px calc(20px + var(--safe-bottom));
+            overflow-y: auto;
+            animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.12);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-sheet .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-sheet .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-sheet .modal-header .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: var(--radius-full);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background var(--transition);
+        }
+
+        .modal-sheet .modal-header .modal-close:active {
+            background: var(--bg-input);
+        }
+
+        .modal-sheet .form-group {
+            margin-bottom: 14px;
+        }
+
+        .modal-sheet .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .modal-sheet .form-group input,
+        .modal-sheet .form-group select,
+        .modal-sheet .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: var(--font);
+            transition: border-color var(--transition), background var(--transition);
+            outline: none;
+        }
+
+        .modal-sheet .form-group input:focus,
+        .modal-sheet .form-group select:focus,
+        .modal-sheet .form-group textarea:focus {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .modal-sheet .form-group textarea {
+            resize: vertical;
+            min-height: 50px;
+        }
+
+        .modal-sheet .form-group .tag-select {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 4px 0;
+        }
+
+        .modal-sheet .form-group .tag-select .tag-option {
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .modal-sheet .form-group .tag-select .tag-option.selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .modal-sheet .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .modal-sheet .form-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: var(--font);
+        }
+
+        .modal-sheet .form-actions .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .modal-sheet .form-actions .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .modal-sheet .form-actions .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+        }
+
+        .modal-sheet .form-actions .btn-secondary:active {
+            transform: scale(0.97);
+        }
+
+        /* File drop */
+        .file-drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--bg-input);
+            color: var(--text-muted);
+        }
+
+        .file-drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .file-drop-zone .drop-icon {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+
+        .file-drop-zone .drop-text {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .file-drop-zone .drop-hint {
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .file-drop-zone input[type="file"] {
+            display: none;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .url-input-group input {
+            flex: 1;
+        }
+
+        .url-input-group button {
+            padding: 0 14px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .upload-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .upload-preview .preview-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            background: var(--bg-input);
+        }
+
+        /* ============================================================
+               VIEWER
+               ============================================================ */
+        .viewer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .viewer-overlay.visible {
+            display: flex;
+        }
+
+        .viewer-overlay .viewer-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background var(--transition);
+            z-index: 10;
+        }
+
+        .viewer-overlay .viewer-close:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .viewer-overlay .viewer-image-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-height: 70vh;
+            overflow: hidden;
+        }
+
+        .viewer-overlay .viewer-image-wrap img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .viewer-overlay .viewer-info {
+            width: 100%;
+            max-width: 480px;
+            padding: 12px 0 0;
+            color: #fff;
+            text-align: center;
+        }
+
+        .viewer-overlay .viewer-info .viewer-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .viewer-overlay .viewer-info .viewer-meta {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 4px;
+        }
+
+        .viewer-overlay .viewer-info .viewer-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .viewer-overlay .viewer-info .viewer-tags .viewer-tag {
+            padding: 2px 10px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.12);
+            font-size: 10px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .viewer-overlay .viewer-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .viewer-overlay .viewer-actions button {
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font);
+        }
+
+        .viewer-overlay .viewer-actions button:active {
+            transform: scale(0.95);
+        }
+
+        .viewer-overlay .viewer-actions .v-btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .viewer-overlay .viewer-actions .v-btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .viewer-overlay .viewer-actions .v-btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .viewer-overlay .viewer-actions .v-btn-fav {
+            background: #ffd93d;
+            color: #1a1a2e;
+        }
+
+        /* ============================================================
+               TOAST
+               ============================================================ */
+        .toast {
+            position: fixed;
+            bottom: calc(var(--tab-height) + 30px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-md);
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 300;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            pointer-events: none;
+            border: 1px solid var(--border-color);
+            max-width: 90%;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+        .toast.info {
+            border-left: 4px solid var(--accent);
+        }
+
+        /* ============================================================
+               SCROLLBAR
+               ============================================================ */
+        .page-container::-webkit-scrollbar {
+            width: 3px;
+        }
+        .page-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .page-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: var(--radius-full);
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (min-width: 600px) {
+            #app {
+                max-width: 600px;
+                border-radius: var(--radius-lg);
+                margin-top: 20px;
+                margin-bottom: 20px;
+                height: calc(100% - 40px);
+                box-shadow: 0 8px 60px rgba(0, 0, 0, 0.10);
+            }
+            .image-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+            .modal-sheet {
+                border-radius: var(--radius-lg);
+                margin: auto;
+                max-height: 85vh;
+            }
+            .modal-overlay {
+                align-items: center;
+            }
+            .category-slide {
+                flex: 0 0 180px;
+                min-height: 90px;
+            }
+        }
+
+        @media (min-width: 900px) {
+            #app {
+                max-width: 720px;
+            }
+            .image-grid {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+            .category-slide {
+                flex: 0 0 200px;
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-title">Galeria</span>
+                <span class="brand-sub">Organize suas memórias</span>
+            </div>
+            <div class="header-actions">
+                <button id="themeToggle" aria-label="Alternar tema">🌓</button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- ===== PAGE: HOME ===== -->
+            <div id="page-home" class="page-container">
+                <div class="stats-grid" id="homeStats"></div>
+                <div style="margin-top:12px;">
+                    <div style="font-weight:600;font-size:16px;margin-bottom:10px;">📸 Últimas imagens</div>
+                    <div class="image-grid" id="homeRecentGrid"></div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: CATEGORIES (SLIDER) ===== -->
+            <div id="page-categories" class="page-container active">
+                <div class="category-section-title">📂 Categorias</div>
+
+                <!-- Horizontal slider -->
+                <div class="category-slider" id="categorySlider"></div>
+
+                <!-- Inline add category (hidden initially) -->
+                <div class="add-category-inline" id="addCategoryInline">
+                    <input type="text" id="newCategoryInput" placeholder="Nome da categoria..." />
+                    <button id="addCategoryBtn">Adicionar</button>
+                    <button id="cancelAddCategory" style="background:var(--bg-input);color:var(--text-secondary);padding:10px 12px;">✕</button>
+                </div>
+
+                <!-- Images by category -->
+                <div class="category-filter-title" id="categoryFilterTitle">📌 Tudo (por categoria)</div>
+                <div class="image-grid" id="categoryFilterGrid"></div>
+            </div>
+
+            <!-- ===== PAGE: FAVORITES ===== -->
+            <div id="page-favorites" class="page-container">
+                <div style="font-weight:600;font-size:18px;margin-bottom:12px;">⭐ Favoritos</div>
+                <div class="image-grid" id="favoritesGrid"></div>
+            </div>
+
+            <!-- ===== PAGE: SETTINGS ===== -->
+            <div id="page-settings" class="page-container">
+                <div class="settings-group">
+                    <span class="settings-label">Aparência</span>
+                    <div class="settings-item">
+                        <div class="settings-left">
+                            <span class="settings-icon">🌓</span>
+                            <div class="settings-info">
+                                <div class="settings-title">Tema escuro</div>
+                                <div class="settings-desc">Ativar modo noturno</div>
+                            </div>
+                        </div>
+                        <button class="toggle" id="settingsThemeToggle">
+                            <span class="toggle-thumb"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <span class="settings-label">Armazenamento</span>
+                    <div class="settings-item">
+                        <div class="settings-left">
+                            <span class="settings-icon">🖼️</span>
+                            <div class="settings-info">
+                                <div class="settings-title">Imagens</div>
+                                <div class="settings-desc">Total armazenadas</div>
+                            </div>
+                        </div>
+                        <span class="settings-value" id="settingsImageCount">0</span>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-left">
+                            <span class="settings-icon">📂</span>
+                            <div class="settings-info">
+                                <div class="settings-title">Categorias</div>
+                                <div class="settings-desc">Total criadas</div>
+                            </div>
+                        </div>
+                        <span class="settings-value" id="settingsCategoryCount">0</span>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-left">
+                            <span class="settings-icon">🏷️</span>
+                            <div class="settings-info">
+                                <div class="settings-title">Tags</div>
+                                <div class="settings-desc">Total criadas</div>
+                            </div>
+                        </div>
+                        <span class="settings-value" id="settingsTagCount">0</span>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <span class="settings-label">Sobre</span>
+                    <div class="settings-item">
+                        <div class="settings-left">
+                            <span class="settings-icon">ℹ️</span>
+                            <div class="settings-info">
+                                <div class="settings-title">Galeria · Organizador</div>
+                                <div class="settings-desc">v1.0 · IndexedDB</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav" role="tablist">
+            <button class="nav-item" data-tab="home" role="tab">
+                <span class="nav-icon">⌂</span>
+                <span class="nav-label">Início</span>
+            </button>
+            <button class="nav-item active" data-tab="categories" role="tab">
+                <span class="nav-icon">▣</span>
+                <span class="nav-label">Categorias</span>
+            </button>
+            <div class="nav-fab">
+                <button id="navFabAdd" aria-label="Adicionar imagem">＋</button>
+            </div>
+            <button class="nav-item" data-tab="favorites" role="tab">
+                <span class="nav-icon">★</span>
+                <span class="nav-label">Favoritos</span>
+                <span class="badge" id="favBadge" style="display:none;">0</span>
+            </button>
+            <button class="nav-item" data-tab="settings" role="tab">
+                <span class="nav-icon">⚙</span>
+                <span class="nav-label">Config.</span>
+            </button>
+        </nav>
+
+        <!-- TOAST -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <!-- ============================================================
+    MODAL: ADD/EDIT IMAGE
+    ============================================================ -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="imageModalTitle">Nova imagem</h2>
+                <button class="modal-close" data-close="imageModal">✕</button>
+            </div>
+            <form id="imageForm" autocomplete="off">
+                <div class="form-group">
+                    <label>Imagem (arquivo ou URL)</label>
+                    <div class="file-drop-zone" id="dropZone">
+                        <div class="drop-icon">📤</div>
+                        <div class="drop-text">Toque para selecionar ou arraste</div>
+                        <div class="drop-hint">PNG, JPG, WEBP</div>
+                        <input type="file" id="imageFileInput" accept="image/*" multiple />
+                    </div>
+                    <div class="url-input-group">
+                        <input type="url" id="imageUrlInput" placeholder="ou cole o link da imagem" />
+                        <button type="button" id="addUrlBtn">Adicionar URL</button>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview"></div>
+                </div>
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" id="imageName" placeholder="Ex: Foto da praia" required />
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="imageDesc" placeholder="Breve descrição..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="imageCategory"><option value="">Selecionar</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div class="tag-select" id="imageTagSelect"></div>
+                    <button type="button" style="margin-top:4px;background:none;border:none;color:var(--accent);font-weight:600;font-size:12px;cursor:pointer;" id="manageTagsBtn">+ Gerenciar tags</button>
+                </div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                        <input type="checkbox" id="imageFav" /> Marcar como favorita
+                    </label>
+                </div>
+                <input type="hidden" id="imageEditId" />
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" data-close="imageModal">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="imageSubmitBtn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL: CATEGORY (edit)
+    ============================================================ -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">Editar categoria</h2>
+                <button class="modal-close" data-close="categoryModal">✕</button>
+            </div>
+            <form id="categoryForm" autocomplete="off">
+                <div class="form-group">
+                    <label>Nome da categoria</label>
+                    <input type="text" id="categoryName" required />
+                </div>
+                <input type="hidden" id="categoryEditId" />
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" data-close="categoryModal">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="categorySubmitBtn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODAL: TAG (add/edit)
+    ============================================================ -->
+    <div class="modal-overlay" id="tagModal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="tagModalTitle">Nova tag</h2>
+                <button class="modal-close" data-close="tagModal">✕</button>
+            </div>
+            <form id="tagForm" autocomplete="off">
+                <div class="form-group">
+                    <label>Nome da tag</label>
+                    <input type="text" id="tagName" placeholder="Ex: Python, Dashboard..." required />
+                </div>
+                <input type="hidden" id="tagEditId" />
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" data-close="tagModal">Cancelar</button>
+                    <button type="submit" class="btn-primary" id="tagSubmitBtn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    VIEWER
+    ============================================================ -->
+    <div class="viewer-overlay" id="viewer">
+        <button class="viewer-close" id="viewerClose">✕</button>
+        <div class="viewer-image-wrap">
+            <img id="viewerImage" src="" alt="Visualizador" />
+        </div>
+        <div class="viewer-info">
+            <div class="viewer-name" id="viewerName">Nome</div>
+            <div class="viewer-meta" id="viewerMeta">Categoria · Data</div>
+            <div class="viewer-tags" id="viewerTags"></div>
+            <div class="viewer-actions">
+                <button class="v-btn-primary" id="viewerFavBtn">⭐ Favoritar</button>
+                <button class="v-btn-outline" id="viewerEditBtn">✏️ Editar</button>
+                <button class="v-btn-danger" id="viewerDeleteBtn">🗑️ Excluir</button>
+                <button class="v-btn-outline" id="viewerShareBtn">📤 Compartilhar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // DATABASE
+            // ============================================================
+            const DB_NAME = 'GalleryAppDB';
+            const DB_VERSION = 7;
+
+            class GalleryDB {
+                constructor() { this.db = null; }
+
+                open() {
+                    return new Promise((resolve, reject) => {
+                        const req = indexedDB.open(DB_NAME, DB_VERSION);
+                        req.onupgradeneeded = (e) => {
+                            const db = e.target.result;
+                            if (!db.objectStoreNames.contains('images')) {
+                                const store = db.createObjectStore('images', { keyPath: 'id' });
+                                store.createIndex('categoria', 'categoria', { unique: false });
+                                store.createIndex('favorito', 'favorito', { unique: false });
+                                store.createIndex('dataCadastro', 'dataCadastro', { unique: false });
+                            }
+                            if (!db.objectStoreNames.contains('categorias')) {
+                                db.createObjectStore('categorias', { keyPath: 'id' });
+                            }
+                            if (!db.objectStoreNames.contains('tags')) {
+                                db.createObjectStore('tags', { keyPath: 'id' });
+                            }
+                        };
+                        req.onsuccess = (e) => { this.db = e.target.result;
+                            resolve(this.db); };
+                        req.onerror = (e) => reject(e.target.error);
+                    });
+                }
+
+                async getAllImages() { return this._getAll('images'); }
+                async getImage(id) { return this._get('images', id); }
+                async putImage(data) { return this._put('images', data); }
+                async deleteImage(id) { return this._delete('images', id); }
+                async getFavorites() { return this._getAllByIndex('images', 'favorito', 1); }
+
+                async getAllCategories() { return this._getAll('categorias'); }
+                async getCategory(id) { return this._get('categorias', id); }
+                async putCategory(data) { return this._put('categorias', data); }
+                async deleteCategory(id) { return this._delete('categorias', id); }
+
+                async getAllTags() { return this._getAll('tags'); }
+                async getTag(id) { return this._get('tags', id); }
+                async putTag(data) { return this._put('tags', data); }
+                async deleteTag(id) { return this._delete('tags', id); }
+
+                _getAll(store) {
+                    return new Promise((resolve, reject) => {
+                        const tx = this.db.transaction(store, 'readonly');
+                        const req = tx.objectStore(store).getAll();
+                        req.onsuccess = () => resolve(req.result || []);
+                        req.onerror = () => reject(req.error);
+                    });
+                }
+                _get(store, id) {
+                    return new Promise((resolve, reject) => {
+                        const tx = this.db.transaction(store, 'readonly');
+                        const req = tx.objectStore(store).get(id);
+                        req.onsuccess = () => resolve(req.result || null);
+                        req.onerror = () => reject(req.error);
+                    });
+                }
+                _put(store, data) {
+                    return new Promise((resolve, reject) => {
+                        const tx = this.db.transaction(store, 'readwrite');
+                        const req = tx.objectStore(store).put(data);
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => reject(req.error);
+                    });
+                }
+                _delete(store, id) {
+                    return new Promise((resolve, reject) => {
+                        const tx = this.db.transaction(store, 'readwrite');
+                        const req = tx.objectStore(store).delete(id);
+                        req.onsuccess = () => resolve();
+                        req.onerror = () => reject(req.error);
+                    });
+                }
+                _getAllByIndex(store, index, value) {
+                    return new Promise((resolve, reject) => {
+                        const tx = this.db.transaction(store, 'readonly');
+                        const req = tx.objectStore(store).index(index).getAll(value);
+                        req.onsuccess = () => resolve(req.result || []);
+                        req.onerror = () => reject(req.error);
+                    });
+                }
+            }
+
+            // ============================================================
+            // STATE
+            // ============================================================
+            const state = {
+                db: null,
+                images: [],
+                categories: [],
+                tags: [],
+                currentTab: 'categories',
+                theme: 'light',
+                viewerImageId: null,
+                selectedFiles: [],
+                editingImageId: null,
+                editingCategoryId: null,
+                editingTagId: null,
+                selectedCategoryId: null,
+            };
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            const $ = (sel) => document.querySelector(sel);
+            const $$ = (sel) => document.querySelectorAll(sel);
+
+            const pages = {
+                home: $('#page-home'),
+                categories: $('#page-categories'),
+                favorites: $('#page-favorites'),
+                settings: $('#page-settings'),
+            };
+
+            const navItems = $$('.bottom-nav .nav-item');
+            const navFab = $('#navFabAdd');
+            const toastEl = $('#toast');
+
+            // ============================================================
+            // UTILITY
+            // ============================================================
+            function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+            function formatDate(ts) {
+                const d = new Date(ts);
+                return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+
+            function truncate(str, n = 30) { return str && str.length > n ? str.slice(0, n) + '…' : str; }
+
+            function showToast(msg, type = 'info') {
+                toastEl.textContent = msg;
+                toastEl.className = 'toast ' + type + ' visible';
+                clearTimeout(toastEl._timer);
+                toastEl._timer = setTimeout(() => toastEl.classList.remove('visible'), 2600);
+            }
+
+            function getImageUrl(data) {
+                if (!data) return '';
+                if (data.startsWith('data:') || data.startsWith('http://') || data.startsWith('https://')) return data;
+                return 'data:image/jpeg;base64,' + data;
+            }
+
+            function isValidUrl(string) {
+                try { const url = new URL(string); return url.protocol === 'http:' || url.protocol === 'https:'; } catch (
+                _) { return false; }
+            }
+
+            // ============================================================
+            // THEME
+            // ============================================================
+            function setTheme(theme) {
+                state.theme = theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('gallery-theme', theme);
+                const isDark = theme === 'dark';
+                const toggles = [document.getElementById('themeToggle'), document.getElementById('settingsThemeToggle')];
+                toggles.forEach(t => {
+                    if (t) {
+                        t.textContent = isDark ? '☀️' : '🌙';
+                        if (t.classList.contains('toggle')) {
+                            t.classList.toggle('active', isDark);
+                        }
+                    }
+                });
+            }
+
+            function toggleTheme() {
+                setTheme(state.theme === 'dark' ? 'light' : 'dark');
+            }
+
+            // ============================================================
+            // NAVIGATION
+            // ============================================================
+            function navigateTo(tab) {
+                state.currentTab = tab;
+                navItems.forEach(item => {
+                    const t = item.dataset.tab;
+                    item.classList.toggle('active', t === tab);
+                    item.setAttribute('aria-selected', t === tab);
+                });
+                Object.keys(pages).forEach(key => {
+                    pages[key].classList.toggle('active', key === tab);
+                    pages[key].classList.toggle('hidden', key !== tab);
+                });
+                renderPage(tab);
+            }
+
+            // ============================================================
+            // RENDER
+            // ============================================================
+            function renderPage(tab) {
+                switch (tab) {
+                    case 'home':
+                        renderHome();
+                        break;
+                    case 'categories':
+                        renderCategories();
+                        break;
+                    case 'favorites':
+                        renderFavorites();
+                        break;
+                    case 'settings':
+                        renderSettings();
+                        break;
+                }
+            }
+
+            function renderHome() {
+                const images = state.images;
+                const cats = state.categories;
+                const tags = state.tags;
+                const favs = images.filter(i => i.favorito === 1);
+
+                $('#homeStats').innerHTML = `
+                    <div class="stat-card accent"><div class="stat-number">${images.length}</div><div class="stat-label">🖼️ Imagens</div></div>
+                    <div class="stat-card success"><div class="stat-number">${cats.length}</div><div class="stat-label">📂 Categorias</div></div>
+                    <div class="stat-card warning"><div class="stat-number">${tags.length}</div><div class="stat-label">🏷️ Tags</div></div>
+                    <div class="stat-card danger"><div class="stat-number">${favs.length}</div><div class="stat-label">⭐ Favoritos</div></div>
+                `;
+                const recent = [...images].sort((a, b) => b.dataCadastro - a.dataCadastro).slice(0, 6);
+                renderImageGrid('#homeRecentGrid', recent, true);
+            }
+
+            function renderImageGrid(selector, images, showEmpty = true) {
+                const container = typeof selector === 'string' ? document.querySelector(selector) : selector;
+                if (!container) return;
+                if (!images || images.length === 0) {
+                    container.innerHTML = showEmpty ?
+                        `<div class="empty-state">
+                            <div class="empty-icon">🖼️</div>
+                            <p>Nenhuma imagem encontrada</p>
+                            <div class="empty-hint">Clique no botão + para adicionar à categoria</div>
+                        </div>` :
+                        '';
+                    return;
+                }
+                let html = '';
+                const cats = state.categories;
+                const tags = state.tags;
+                images.forEach(img => {
+                    const catName = cats.find(c => c.id === img.categoria)?.nome || 'Sem categoria';
+                    const tagNames = (img.tags || []).map(tid => tags.find(t => t.id === tid)?.nome || '').filter(Boolean)
+                        .join(', ');
+                    const isFav = img.favorito === 1;
+                    html += `
+                        <div class="grid-item" data-id="${img.id}">
+                            <img src="${getImageUrl(img.imagem)}" alt="${img.nome}" loading="lazy" />
+                            ${isFav ? '<span class="favorite-badge">★</span>' : ''}
+                            <div class="item-overlay">
+                                <span class="item-category">${truncate(catName, 20)}</span>
+                                <span class="item-tags">${truncate(tagNames, 25) || 'Sem tags'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                container.querySelectorAll('.grid-item').forEach(el => {
+                    el.addEventListener('click', () => openViewer(el.dataset.id));
+                });
+            }
+
+            // ============================================================
+            // CATEGORIES PAGE - SLIDER with image preview
+            // ============================================================
+            function renderCategories() {
+                const cats = state.categories;
+                const slider = $('#categorySlider');
+
+                // Build slides
+                let html = '';
+                cats.forEach(c => {
+                    const count = state.images.filter(i => i.categoria === c.id).length;
+                    const active = state.selectedCategoryId === c.id ? 'active-slide' : '';
+                    // Get a random image from this category (or first)
+                    const categoryImages = state.images.filter(i => i.categoria === c.id);
+                    let bgImage = '';
+                    if (categoryImages.length > 0) {
+                        // pick a random image
+                        const randomImg = categoryImages[Math.floor(Math.random() * categoryImages.length)];
+                        bgImage = getImageUrl(randomImg.imagem);
+                    }
+                    // Fallback icon if no image
+                    const icon = getCategoryIcon(c.nome);
+                    const styleAttr = bgImage ? `style="background-image: url('${bgImage}');"` : '';
+                    html += `
+                        <div class="category-slide ${active}" data-id="${c.id}" ${styleAttr}>
+                            ${!bgImage ? `<div class="slide-icon">${icon}</div>` : ''}
+                            <div class="slide-name">${c.nome}</div>
+                            <div class="slide-count">${count} ${count === 1 ? 'item' : 'itens'}</div>
+                            <div class="slide-actions">
+                                <button class="edit-slide" data-id="${c.id}">✎</button>
+                                <button class="delete-slide" data-id="${c.id}">✕</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Add slide (always last)
+                html += `
+                    <div class="category-slide add-slide" id="addSlideTrigger">
+                        <div class="add-icon">＋</div>
+                        <div class="add-text">Nova categoria</div>
+                    </div>
+                `;
+
+                slider.innerHTML = html;
+
+                // Click on slide -> filter
+                slider.querySelectorAll('.category-slide:not(.add-slide)').forEach(slide => {
+                    slide.addEventListener('click', (e) => {
+                        if (e.target.closest('.slide-actions')) return;
+                        const id = slide.dataset.id;
+                        state.selectedCategoryId = state.selectedCategoryId === id ? null : id;
+                        renderCategories();
+                        updateCategoryFilterGrid();
+                    });
+                });
+
+                // Edit slide
+                slider.querySelectorAll('.edit-slide').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openCategoryModal(btn.dataset.id);
+                    });
+                });
+
+                // Delete slide
+                slider.querySelectorAll('.delete-slide').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteCategory(btn.dataset.id);
+                    });
+                });
+
+                // Add slide trigger
+                const addTrigger = document.getElementById('addSlideTrigger');
+                if (addTrigger) {
+                    addTrigger.addEventListener('click', () => {
+                        const inline = document.getElementById('addCategoryInline');
+                        inline.classList.toggle('visible');
+                        if (inline.classList.contains('visible')) {
+                            document.getElementById('newCategoryInput').focus();
+                        }
+                    });
+                }
+
+                // Update filter grid
+                updateCategoryFilterGrid();
+
+                // Update filter title
+                const title = $('#categoryFilterTitle');
+                if (state.selectedCategoryId) {
+                    const cat = state.categories.find(c => c.id === state.selectedCategoryId);
+                    title.textContent = `📌 ${cat ? cat.nome : 'Categoria'}`;
+                } else {
+                    title.textContent = '📌 Tudo (por categoria)';
+                }
+            }
+
+            function getCategoryIcon(name) {
+                const icons = {
+                    'pães': '🍞',
+                    'paes': '🍞',
+                    'pão': '🍞',
+                    'salgados': '🥟',
+                    'salgado': '🥟',
+                    'arquitetura': '🏛️',
+                    'plantas': '🌿',
+                    'planta': '🌿',
+                    'trabalho': '💼',
+                    'família': '👨‍👩‍👦',
+                    'familia': '👨‍👩‍👦',
+                    'viagem': '✈️',
+                    'viagens': '✈️',
+                    'receitas': '🍳',
+                    'receita': '🍳',
+                    'documentos': '📄',
+                    'documento': '📄',
+                    'projetos': '📋',
+                    'projeto': '📋',
+                    'estudos': '📚',
+                    'estudo': '📚',
+                };
+                const lower = name.toLowerCase();
+                for (const [key, icon] of Object.entries(icons)) {
+                    if (lower.includes(key)) return icon;
+                }
+                return '📂';
+            }
+
+            function updateCategoryFilterGrid() {
+                const filtered = state.selectedCategoryId ?
+                    state.images.filter(i => i.categoria === state.selectedCategoryId) :
+                    state.images;
+                renderImageGrid('#categoryFilterGrid', filtered, true);
+            }
+
+            // ============================================================
+            // FAVORITES
+            // ============================================================
+            function renderFavorites() {
+                const favs = state.images.filter(i => i.favorito === 1);
+                const badge = $('#favBadge');
+                if (favs.length > 0) {
+                    badge.textContent = favs.length;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+                renderImageGrid('#favoritesGrid', favs, true);
+            }
+
+            // ============================================================
+            // SETTINGS
+            // ============================================================
+            function renderSettings() {
+                $('#settingsImageCount').textContent = state.images.length;
+                $('#settingsCategoryCount').textContent = state.categories.length;
+                $('#settingsTagCount').textContent = state.tags.length;
+                const toggle = $('#settingsThemeToggle');
+                toggle.classList.toggle('active', state.theme === 'dark');
+                toggle.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+            }
+
+            // ============================================================
+            // VIEWER
+            // ============================================================
+            function openViewer(id) {
+                const img = state.images.find(i => i.id === id);
+                if (!img) return;
+                state.viewerImageId = id;
+                const catName = state.categories.find(c => c.id === img.categoria)?.nome || 'Sem categoria';
+                const tagNames = (img.tags || []).map(tid => state.tags.find(t => t.id === tid)?.nome || '').filter(Boolean);
+
+                $('#viewerImage').src = getImageUrl(img.imagem);
+                $('#viewerName').textContent = img.nome || 'Sem nome';
+                $('#viewerMeta').textContent = `${catName} · ${formatDate(img.dataCadastro)}`;
+                $('#viewerTags').innerHTML = tagNames.map(t => `<span class="viewer-tag">#${t}</span>`).join('');
+
+                const favBtn = $('#viewerFavBtn');
+                favBtn.textContent = img.favorito === 1 ? '★ Favorito' : '☆ Favoritar';
+                favBtn.className = img.favorito === 1 ? 'v-btn-fav' : 'v-btn-primary';
+
+                document.getElementById('viewer').classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeViewer() {
+                document.getElementById('viewer').classList.remove('visible');
+                document.body.style.overflow = '';
+                state.viewerImageId = null;
+            }
+
+            // ============================================================
+            // CRUD: IMAGES (with multiple file support)
+            // ============================================================
+            async function loadImages() {
+                state.images = await state.db.getAllImages();
+                state.images.sort((a, b) => b.dataCadastro - a.dataCadastro);
+            }
+
+            async function loadCategories() {
+                state.categories = await state.db.getAllCategories();
+            }
+
+            async function loadTags() {
+                state.tags = await state.db.getAllTags();
+            }
+
+            async function refreshAll() {
+                await loadImages();
+                await loadCategories();
+                await loadTags();
+                renderPage(state.currentTab);
+                updateCategorySelect();
+                updateTagSelect();
+            }
+
+            function updateCategorySelect() {
+                const sel = $('#imageCategory');
+                const current = sel.value;
+                sel.innerHTML = '<option value="">Selecionar</option>';
+                state.categories.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nome;
+                    sel.appendChild(opt);
+                });
+                if (current && state.categories.some(c => c.id === current)) sel.value = current;
+            }
+
+            function updateTagSelect() {
+                const container = $('#imageTagSelect');
+                const selected = new Set();
+                container.querySelectorAll('.tag-option.selected').forEach(el => selected.add(el.dataset.id));
+                container.innerHTML = '';
+                state.tags.forEach(t => {
+                    const span = document.createElement('span');
+                    span.className = 'tag-option' + (selected.has(t.id) ? ' selected' : '');
+                    span.dataset.id = t.id;
+                    span.textContent = t.nome;
+                    span.addEventListener('click', () => span.classList.toggle('selected'));
+                    container.appendChild(span);
+                });
+            }
+
+            function getSelectedTags() {
+                const container = $('#imageTagSelect');
+                return [...container.querySelectorAll('.tag-option.selected')].map(el => el.dataset.id);
+            }
+
+            function openImageModal(editId = null) {
+                state.editingImageId = editId;
+                const title = $('#imageModalTitle');
+                const submitBtn = $('#imageSubmitBtn');
+                const form = $('#imageForm');
+                form.reset();
+                $('#uploadPreview').innerHTML = '';
+                $('#imageEditId').value = '';
+                $('#imageFav').checked = false;
+                $('#imageUrlInput').value = '';
+                state.selectedFiles = [];
+                updateTagSelect();
+
+                if (editId) {
+                    const img = state.images.find(i => i.id === editId);
+                    if (!img) return;
+                    title.textContent = 'Editar imagem';
+                    submitBtn.textContent = 'Atualizar';
+                    $('#imageName').value = img.nome || '';
+                    $('#imageDesc').value = img.descricao || '';
+                    $('#imageCategory').value = img.categoria || '';
+                    $('#imageFav').checked = img.favorito === 1;
+                    $('#imageEditId').value = img.id;
+                    const tagContainer = $('#imageTagSelect');
+                    tagContainer.querySelectorAll('.tag-option').forEach(el => {
+                        if ((img.tags || []).includes(el.dataset.id)) el.classList.add('selected');
+                    });
+                    const preview = $('#uploadPreview');
+                    preview.innerHTML = `
+                        <div style="position:relative;display:inline-block;">
+                            <img src="${getImageUrl(img.imagem)}" class="preview-thumb" style="width:70px;height:70px;" />
+                            <span style="position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;" data-remove-preview>✕</span>
+                        </div>
+                    `;
+                    preview.querySelector('[data-remove-preview]')?.addEventListener('click', () => {
+                        preview.innerHTML = '';
+                        state.selectedFiles = [];
+                    });
+                } else {
+                    title.textContent = 'Nova imagem';
+                    submitBtn.textContent = 'Salvar';
+                }
+                document.getElementById('imageModal').classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeImageModal() {
+                document.getElementById('imageModal').classList.remove('visible');
+                document.body.style.overflow = '';
+                state.selectedFiles = [];
+                state.editingImageId = null;
+            }
+
+            async function saveImage(e) {
+                e.preventDefault();
+                const nameBase = $('#imageName').value.trim();
+                const desc = $('#imageDesc').value.trim();
+                const categoria = $('#imageCategory').value;
+                const fav = $('#imageFav').checked ? 1 : 0;
+                const editId = $('#imageEditId').value;
+                const selectedTags = getSelectedTags();
+
+                // If editing, only one image is updated
+                if (editId) {
+                    if (!nameBase) { showToast('Informe o nome da imagem', 'error'); return; }
+                    let imageData = null;
+                    const existing = state.images.find(i => i.id === editId);
+                    if (existing) imageData = existing.imagem;
+
+                    const urlInput = $('#imageUrlInput').value.trim();
+                    if (urlInput && isValidUrl(urlInput)) {
+                        imageData = urlInput;
+                        state.selectedFiles = [];
+                        $('#uploadPreview').innerHTML = '';
+                    } else if (state.selectedFiles.length > 0) {
+                        try { imageData = await fileToBase64(state.selectedFiles[0]); } catch (err) { showToast(
+                                'Erro ao processar imagem', 'error'); return; }
+                    } else if (!imageData) { showToast('Selecione uma imagem ou insira uma URL', 'error'); return; }
+
+                    const data = {
+                        id: editId,
+                        nome: nameBase,
+                        descricao: desc,
+                        categoria: categoria,
+                        tags: selectedTags,
+                        favorito: fav,
+                        dataCadastro: existing ? existing.dataCadastro : Date.now(),
+                        imagem: imageData,
+                    };
+                    await state.db.putImage(data);
+                    await refreshAll();
+                    closeImageModal();
+                    showToast('Imagem atualizada!', 'success');
+                    return;
+                }
+
+                // NEW IMAGE: handle multiple files
+                if (!nameBase) { showToast('Informe um nome base para as imagens', 'error'); return; }
+
+                // Check if we have files or URL
+                const urlInput = $('#imageUrlInput').value.trim();
+                let filesToProcess = [];
+
+                if (urlInput && isValidUrl(urlInput)) {
+                    // Single URL image
+                    filesToProcess = [{ url: urlInput }];
+                } else if (state.selectedFiles.length > 0) {
+                    // Multiple files
+                    filesToProcess = state.selectedFiles;
+                } else {
+                    showToast('Selecione uma imagem ou insira uma URL', 'error');
+                    return;
+                }
+
+                // Process each file
+                let successCount = 0;
+                for (let i = 0; i < filesToProcess.length; i++) {
+                    const file = filesToProcess[i];
+                    let imageData = null;
+                    let fileName = nameBase;
+                    if (filesToProcess.length > 1) {
+                        fileName = `${nameBase} ${i+1}`;
+                    }
+                    try {
+                        if (file.url) {
+                            // It's a URL
+                            imageData = file.url;
+                        } else {
+                            imageData = await fileToBase64(file);
+                        }
+                    } catch (err) {
+                        console.error('Error processing file:', err);
+                        continue;
+                    }
+                    const data = {
+                        id: uid(),
+                        nome: fileName,
+                        descricao: desc,
+                        categoria: categoria,
+                        tags: selectedTags,
+                        favorito: fav,
+                        dataCadastro: Date.now(),
+                        imagem: imageData,
+                    };
+                    await state.db.putImage(data);
+                    successCount++;
+                }
+
+                if (successCount === 0) {
+                    showToast('Erro ao adicionar imagens', 'error');
+                    return;
+                }
+
+                await refreshAll();
+                closeImageModal();
+                showToast(`${successCount} imagem(ns) adicionada(s)!`, 'success');
+            }
+
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            async function deleteImage(id) {
+                if (!confirm('Excluir esta imagem permanentemente?')) return;
+                await state.db.deleteImage(id);
+                await refreshAll();
+                closeViewer();
+                showToast('Imagem excluída', 'info');
+            }
+
+            async function toggleFavorite(id) {
+                const img = state.images.find(i => i.id === id);
+                if (!img) return;
+                img.favorito = img.favorito === 1 ? 0 : 1;
+                await state.db.putImage(img);
+                await refreshAll();
+                if (state.viewerImageId === id) openViewer(id);
+                showToast(img.favorito === 1 ? '★ Adicionado aos favoritos' : '☆ Removido dos favoritos', 'info');
+            }
+
+            // ============================================================
+            // CRUD: CATEGORIES
+            // ============================================================
+            async function addCategory(name) {
+                name = name.trim();
+                if (!name) { showToast('Informe o nome da categoria', 'error'); return; }
+                const exists = state.categories.some(c => c.nome.toLowerCase() === name.toLowerCase());
+                if (exists) { showToast('Categoria já existe', 'error'); return; }
+                const data = { id: uid(), nome: name };
+                await state.db.putCategory(data);
+                await refreshAll();
+                // Hide inline add
+                document.getElementById('addCategoryInline').classList.remove('visible');
+                document.getElementById('newCategoryInput').value = '';
+                showToast('Categoria criada!', 'success');
+            }
+
+            function openCategoryModal(editId) {
+                const cat = state.categories.find(c => c.id === editId);
+                if (!cat) return;
+                state.editingCategoryId = editId;
+                $('#categoryModalTitle').textContent = 'Editar categoria';
+                $('#categoryName').value = cat.nome;
+                $('#categoryEditId').value = cat.id;
+                $('#categorySubmitBtn').textContent = 'Atualizar';
+                document.getElementById('categoryModal').classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeCategoryModal() {
+                document.getElementById('categoryModal').classList.remove('visible');
+                document.body.style.overflow = '';
+                state.editingCategoryId = null;
+            }
+
+            async function saveCategory(e) {
+                e.preventDefault();
+                const name = $('#categoryName').value.trim();
+                const editId = $('#categoryEditId').value;
+                if (!name) { showToast('Informe o nome', 'error'); return; }
+                const exists = state.categories.some(c => c.nome.toLowerCase() === name.toLowerCase() && c.id !== editId);
+                if (exists) { showToast('Categoria já existe', 'error'); return; }
+                const data = { id: editId || uid(), nome: name };
+                await state.db.putCategory(data);
+                await refreshAll();
+                closeCategoryModal();
+                showToast(editId ? 'Categoria atualizada!' : 'Categoria criada!', 'success');
+            }
+
+            async function deleteCategory(id) {
+                const used = state.images.some(i => i.categoria === id);
+                if (used) { showToast('Categoria em uso por imagens', 'error'); return; }
+                if (!confirm('Excluir esta categoria?')) return;
+                await state.db.deleteCategory(id);
+                if (state.selectedCategoryId === id) state.selectedCategoryId = null;
+                await refreshAll();
+                showToast('Categoria excluída', 'info');
+            }
+
+            // ============================================================
+            // CRUD: TAGS
+            // ============================================================
+            function openTagModal(editId = null) {
+                state.editingTagId = editId;
+                const title = $('#tagModalTitle');
+                const submitBtn = $('#tagSubmitBtn');
+                const form = $('#tagForm');
+                form.reset();
+                $('#tagEditId').value = '';
+                if (editId) {
+                    const tag = state.tags.find(t => t.id === editId);
+                    if (!tag) return;
+                    title.textContent = 'Editar tag';
+                    submitBtn.textContent = 'Atualizar';
+                    $('#tagName').value = tag.nome;
+                    $('#tagEditId').value = tag.id;
+                } else {
+                    title.textContent = 'Nova tag';
+                    submitBtn.textContent = 'Salvar';
+                }
+                document.getElementById('tagModal').classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeTagModal() {
+                document.getElementById('tagModal').classList.remove('visible');
+                document.body.style.overflow = '';
+                state.editingTagId = null;
+            }
+
+            async function saveTag(e) {
+                e.preventDefault();
+                const name = $('#tagName').value.trim();
+                const editId = $('#tagEditId').value;
+                if (!name) { showToast('Informe o nome da tag', 'error'); return; }
+                const exists = state.tags.some(t => t.nome.toLowerCase() === name.toLowerCase() && t.id !== editId);
+                if (exists) { showToast('Tag já existe', 'error'); return; }
+                const data = { id: editId || uid(), nome: name };
+                await state.db.putTag(data);
+                await refreshAll();
+                closeTagModal();
+                showToast(editId ? 'Tag atualizada!' : 'Tag criada!', 'success');
+            }
+
+            async function deleteTag(id) {
+                const used = state.images.some(i => (i.tags || []).includes(id));
+                if (used) { showToast('Tag em uso por imagens', 'error'); return; }
+                if (!confirm('Excluir esta tag?')) return;
+                await state.db.deleteTag(id);
+                await refreshAll();
+                showToast('Tag excluída', 'info');
+            }
+
+            // ============================================================
+            // FILE & URL UPLOAD
+            // ============================================================
+            function setupFileUpload() {
+                const dropZone = $('#dropZone');
+                const fileInput = $('#imageFileInput');
+                const preview = $('#uploadPreview');
+                const urlInput = $('#imageUrlInput');
+                const addUrlBtn = $('#addUrlBtn');
+
+                dropZone.addEventListener('click', () => fileInput.click());
+                dropZone.addEventListener('dragover', (e) => { e.preventDefault();
+                    dropZone.classList.add('dragover'); });
+                dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    if (e.dataTransfer.files.length) handleFiles([...e.dataTransfer.files]);
+                });
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length) handleFiles([...fileInput.files]);
+                    fileInput.value = '';
+                });
+
+                addUrlBtn.addEventListener('click', () => {
+                    const url = urlInput.value.trim();
+                    if (url && isValidUrl(url)) {
+                        state.selectedFiles = [];
+                        preview.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.className = 'preview-thumb';
+                        img.style.width = '70px';
+                        img.style.height = '70px';
+                        img.onerror = () => { showToast('URL inválida ou imagem não acessível', 'error');
+                            img.remove(); };
+                        const wrapper = document.createElement('div');
+                        wrapper.style.position = 'relative';
+                        wrapper.style.display = 'inline-block';
+                        wrapper.appendChild(img);
+                        const removeBtn = document.createElement('span');
+                        removeBtn.textContent = '✕';
+                        removeBtn.style.cssText =
+                            'position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+                        removeBtn.addEventListener('click', () => { wrapper.remove();
+                            urlInput.value = ''; });
+                        wrapper.appendChild(removeBtn);
+                        preview.appendChild(wrapper);
+                        state.selectedFiles = [{ url }];
+                    } else {
+                        showToast('Insira uma URL válida', 'error');
+                    }
+                });
+
+                function handleFiles(files) {
+                    const valid = files.filter(f => f.type.startsWith('image/'));
+                    if (!valid.length) { showToast('Selecione apenas imagens', 'error'); return; }
+                    urlInput.value = '';
+                    const toShow = valid.slice(0, 5); // limit to 5 previews
+                    state.selectedFiles = valid; // store all valid files
+                    preview.innerHTML = '';
+                    toShow.forEach((f, idx) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'preview-thumb';
+                            img.style.width = '70px';
+                            img.style.height = '70px';
+                            const wrapper = document.createElement('div');
+                            wrapper.style.position = 'relative';
+                            wrapper.style.display = 'inline-block';
+                            wrapper.appendChild(img);
+                            const removeBtn = document.createElement('span');
+                            removeBtn.textContent = '✕';
+                            removeBtn.style.cssText =
+                                'position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+                            removeBtn.addEventListener('click', () => {
+                                wrapper.remove();
+                                // Remove from state
+                                state.selectedFiles = state.selectedFiles.filter((_, i) => i !== idx);
+                                if (!state.selectedFiles.length) preview.innerHTML = '';
+                            });
+                            wrapper.appendChild(removeBtn);
+                            preview.appendChild(wrapper);
+                        };
+                        reader.readAsDataURL(f);
+                    });
+                    // If more than 5, show a small indicator
+                    if (valid.length > 5) {
+                        const indicator = document.createElement('div');
+                        indicator.textContent = `+${valid.length - 5} mais`;
+                        indicator.style.cssText =
+                            'font-size:12px;color:var(--text-muted);display:flex;align-items:center;padding:0 8px;';
+                        preview.appendChild(indicator);
+                    }
+                }
+            }
+
+            // ============================================================
+            // SHARE
+            // ============================================================
+            async function shareImage(id) {
+                const img = state.images.find(i => i.id === id);
+                if (!img) return;
+                try {
+                    const url = getImageUrl(img.imagem);
+                    if (navigator.share) { await navigator.share({ title: img.nome || 'Imagem', url }); } else {
+                        await navigator.clipboard.writeText(url);
+                        showToast('Link copiado', 'success');
+                    }
+                } catch { showToast('Não foi possível compartilhar', 'error'); }
+            }
+
+            // ============================================================
+            // INIT EVENTS
+            // ============================================================
+            function initEvents() {
+                // Navigation
+                navItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const tab = item.dataset.tab;
+                        if (tab && tab !== state.currentTab) navigateTo(tab);
+                    });
+                });
+
+                // Nav FAB
+                navFab.addEventListener('click', () => openImageModal());
+
+                // Theme
+                document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+                document.getElementById('settingsThemeToggle').addEventListener('click', toggleTheme);
+
+                // Add category (inline)
+                document.getElementById('addCategoryBtn').addEventListener('click', async () => {
+                    const input = document.getElementById('newCategoryInput');
+                    const name = input.value.trim();
+                    if (name) {
+                        await addCategory(name);
+                    } else {
+                        showToast('Digite um nome para a categoria', 'error');
+                    }
+                });
+                document.getElementById('newCategoryInput').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('addCategoryBtn').click();
+                    }
+                });
+                document.getElementById('cancelAddCategory').addEventListener('click', () => {
+                    document.getElementById('addCategoryInline').classList.remove('visible');
+                    document.getElementById('newCategoryInput').value = '';
+                });
+
+                // Image modal
+                document.querySelectorAll('[data-close="imageModal"]').forEach(el => el.addEventListener('click',
+                    closeImageModal));
+                document.getElementById('imageForm').addEventListener('submit', saveImage);
+
+                // Category modal
+                document.querySelectorAll('[data-close="categoryModal"]').forEach(el => el.addEventListener('click',
+                    closeCategoryModal));
+                document.getElementById('categoryForm').addEventListener('submit', saveCategory);
+
+                // Tag modal
+                document.querySelectorAll('[data-close="tagModal"]').forEach(el => el.addEventListener('click',
+                    closeTagModal));
+                document.getElementById('tagForm').addEventListener('submit', saveTag);
+                document.getElementById('manageTagsBtn').addEventListener('click', () => openTagModal());
+
+                // Viewer
+                document.getElementById('viewerClose').addEventListener('click', closeViewer);
+                document.getElementById('viewer').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('viewer')) closeViewer();
+                });
+                document.getElementById('viewerFavBtn').addEventListener('click', () => {
+                    if (state.viewerImageId) toggleFavorite(state.viewerImageId);
+                });
+                document.getElementById('viewerEditBtn').addEventListener('click', () => {
+                    if (state.viewerImageId) { closeViewer();
+                        openImageModal(state.viewerImageId); }
+                });
+                document.getElementById('viewerDeleteBtn').addEventListener('click', () => {
+                    if (state.viewerImageId) deleteImage(state.viewerImageId);
+                });
+                document.getElementById('viewerShareBtn').addEventListener('click', () => {
+                    if (state.viewerImageId) shareImage(state.viewerImageId);
+                });
+
+                // Close modals on overlay click
+                document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) {
+                            overlay.classList.remove('visible');
+                            document.body.style.overflow = '';
+                        }
+                    });
+                });
+
+                // Keyboard
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (document.getElementById('viewer').classList.contains('visible')) closeViewer();
+                        if (document.getElementById('imageModal').classList.contains('visible')) closeImageModal();
+                        if (document.getElementById('categoryModal').classList.contains('visible'))
+                            closeCategoryModal();
+                        if (document.getElementById('tagModal').classList.contains('visible')) closeTagModal();
+                        // Hide inline add
+                        document.getElementById('addCategoryInline').classList.remove('visible');
+                    }
+                });
+
+                setupFileUpload();
+            }
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            async function init() {
+                try {
+                    const db = new GalleryDB();
+                    await db.open();
+                    state.db = db;
+
+                    const savedTheme = localStorage.getItem('gallery-theme') || 'light';
+                    setTheme(savedTheme);
+
+                    await refreshAll();
+
+                    // Start on categories
+                    navigateTo('categories');
+
+                    initEvents();
+
+                    showToast('📸 Galeria pronta!', 'info');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Erro ao iniciar', 'error');
+                }
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) refreshAll();
+            });
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+
+</body>
+</html>
