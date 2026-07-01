@@ -231,7 +231,7 @@
         }
 
         .bottom-nav .nav-item .nav-icon {
-            font-size: 22px;
+            font-size: 24px;
             line-height: 1;
             transition: transform 0.2s ease;
             font-family: 'Segoe UI', 'Arial Unicode MS', sans-serif;
@@ -311,7 +311,7 @@
                CATEGORIES PAGE - SLIDER STYLE
                ============================================================ */
         .category-section-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
             color: var(--text-primary);
             margin: 0 0 12px 0;
@@ -379,7 +379,7 @@
         }
 
         .category-slide .slide-icon {
-            font-size: 22px;
+            font-size: 24px;
             margin-bottom: 4px;
             opacity: 0.9;
             text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
@@ -387,7 +387,7 @@
 
         .category-slide .slide-name {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             color: #fff;
             line-height: 1.2;
             text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
@@ -460,7 +460,7 @@
         }
 
         .category-slide.add-slide .add-text {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-muted);
             margin-top: 2px;
         }
@@ -517,7 +517,7 @@
                IMAGE GRID
                ============================================================ */
         .category-filter-title {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--text-secondary);
             margin: 12px 0 10px 0;
@@ -567,14 +567,14 @@
         }
 
         .image-grid .grid-item .item-overlay .item-category {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.9);
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
         .image-grid .grid-item .item-overlay .item-tags {
-            font-size: 9px;
+            font-size: 10px;
             color: rgba(255, 255, 255, 0.7);
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
@@ -583,7 +583,7 @@
             position: absolute;
             top: 6px;
             right: 6px;
-            font-size: 14px;
+            font-size: 16px;
             color: #ffd93d;
             text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
             filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.3));
@@ -597,17 +597,17 @@
         }
 
         .image-grid .empty-state .empty-icon {
-            font-size: 40px;
+            font-size: 44px;
             margin-bottom: 8px;
             opacity: 0.4;
         }
 
         .image-grid .empty-state p {
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .image-grid .empty-state .empty-hint {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
             opacity: 0.7;
             margin-top: 4px;
@@ -633,14 +633,14 @@
         }
 
         .stat-card .stat-number {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
             color: var(--text-primary);
             line-height: 1.2;
         }
 
         .stat-card .stat-label {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
             margin-top: 2px;
             font-weight: 500;
@@ -695,7 +695,7 @@
         }
 
         .settings-item .settings-left .settings-icon {
-            font-size: 18px;
+            font-size: 20px;
             width: 28px;
             text-align: center;
         }
@@ -1007,7 +1007,7 @@
         }
 
         /* ============================================================
-               VIEWER
+               VIEWER - Melhorias
                ============================================================ */
         .viewer-overlay {
             position: fixed;
@@ -1020,8 +1020,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 0;
             animation: fadeIn 0.3s ease;
+            touch-action: none;
         }
 
         .viewer-overlay.visible {
@@ -1029,36 +1030,43 @@
         }
 
         .viewer-overlay .viewer-close {
-            position: absolute;
+            position: fixed;
             top: 16px;
             right: 16px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             border: none;
             color: #fff;
-            font-size: 24px;
-            width: 40px;
-            height: 40px;
+            font-size: 26px;
+            width: 44px;
+            height: 44px;
             border-radius: var(--radius-full);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background var(--transition);
-            z-index: 10;
+            z-index: 20;
+            backdrop-filter: blur(6px);
         }
 
         .viewer-overlay .viewer-close:active {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.25);
         }
 
         .viewer-overlay .viewer-image-wrap {
             flex: 1;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            max-height: 70vh;
-            overflow: hidden;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pinch-zoom;
+            user-select: none;
+            -webkit-user-select: none;
+            padding: 80px 16px 100px;
+            /* espaço para botões */
         }
 
         .viewer-overlay .viewer-image-wrap img {
@@ -1067,86 +1075,121 @@
             object-fit: contain;
             border-radius: var(--radius-sm);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            /* permite que o zoom funcione no container */
+            touch-action: pinch-zoom;
         }
 
-        .viewer-overlay .viewer-info {
-            width: 100%;
-            max-width: 480px;
-            padding: 12px 0 0;
+        /* Barra de ações flutuante sobre a imagem */
+        .viewer-actions-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 14px;
+            border-radius: var(--radius-full);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            z-index: 15;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90%;
+        }
+
+        .viewer-actions-bar button {
+            background: transparent;
+            border: none;
             color: #fff;
-            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font);
+            white-space: nowrap;
         }
 
-        .viewer-overlay .viewer-info .viewer-name {
+        .viewer-actions-bar button:active {
+            transform: scale(0.92);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .viewer-actions-bar button .action-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .viewer-actions-bar .fav-btn.active {
+            color: #ffd93d;
+        }
+
+        .viewer-actions-bar .fav-btn:not(.active) {
+            color: #fff;
+        }
+
+        .viewer-actions-bar .del-btn {
+            color: #ff6b6b;
+        }
+
+        .viewer-actions-bar .edit-btn {
+            color: #74b9ff;
+        }
+
+        .viewer-actions-bar .share-btn {
+            color: #81ecec;
+        }
+
+        .viewer-actions-bar .download-btn {
+            color: #a29bfe;
+        }
+
+        /* Informações da imagem (nome, etc) - agora em cima, compacto */
+        .viewer-info-top {
+            position: fixed;
+            top: 70px;
+            left: 16px;
+            right: 16px;
+            color: #fff;
+            text-align: left;
+            z-index: 15;
+            pointer-events: none;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .viewer-info-top .viewer-name {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 2px;
         }
 
-        .viewer-overlay .viewer-info .viewer-meta {
+        .viewer-info-top .viewer-meta {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 4px;
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .viewer-overlay .viewer-info .viewer-tags {
+        .viewer-info-top .viewer-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 4px;
-            justify-content: center;
-            margin-bottom: 8px;
+            margin-top: 4px;
         }
 
-        .viewer-overlay .viewer-info .viewer-tags .viewer-tag {
+        .viewer-info-top .viewer-tags .viewer-tag {
             padding: 2px 10px;
             border-radius: var(--radius-full);
             background: rgba(255, 255, 255, 0.12);
             font-size: 10px;
             font-weight: 500;
             color: rgba(255, 255, 255, 0.8);
-        }
-
-        .viewer-overlay .viewer-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .viewer-overlay .viewer-actions button {
-            padding: 8px 16px;
-            border-radius: var(--radius-full);
-            border: none;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-family: var(--font);
-        }
-
-        .viewer-overlay .viewer-actions button:active {
-            transform: scale(0.95);
-        }
-
-        .viewer-overlay .viewer-actions .v-btn-primary {
-            background: var(--accent);
-            color: #fff;
-        }
-        .viewer-overlay .viewer-actions .v-btn-danger {
-            background: var(--danger);
-            color: #fff;
-        }
-        .viewer-overlay .viewer-actions .v-btn-outline {
-            background: transparent;
-            color: #fff;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        .viewer-overlay .viewer-actions .v-btn-fav {
-            background: #ffd93d;
-            color: #1a1a2e;
         }
 
         /* ============================================================
@@ -1268,7 +1311,7 @@
             <div id="page-home" class="page-container">
                 <div class="stats-grid" id="homeStats"></div>
                 <div style="margin-top:12px;">
-                    <div style="font-weight:600;font-size:16px;margin-bottom:10px;">📸 Últimas imagens</div>
+                    <div style="font-weight:600;font-size:17px;margin-bottom:10px;">📸 Últimas imagens</div>
                     <div class="image-grid" id="homeRecentGrid"></div>
                 </div>
             </div>
@@ -1496,23 +1539,40 @@
     </div>
 
     <!-- ============================================================
-    VIEWER
+    VIEWER - Estrutura atualizada
     ============================================================ -->
     <div class="viewer-overlay" id="viewer">
         <button class="viewer-close" id="viewerClose">✕</button>
-        <div class="viewer-image-wrap">
-            <img id="viewerImage" src="" alt="Visualizador" />
-        </div>
-        <div class="viewer-info">
+
+        <!-- Informações no topo (nome, categoria, tags) -->
+        <div class="viewer-info-top" id="viewerInfoTop">
             <div class="viewer-name" id="viewerName">Nome</div>
             <div class="viewer-meta" id="viewerMeta">Categoria · Data</div>
             <div class="viewer-tags" id="viewerTags"></div>
-            <div class="viewer-actions">
-                <button class="v-btn-primary" id="viewerFavBtn">⭐ Favoritar</button>
-                <button class="v-btn-outline" id="viewerEditBtn">✏️ Editar</button>
-                <button class="v-btn-danger" id="viewerDeleteBtn">🗑️ Excluir</button>
-                <button class="v-btn-outline" id="viewerShareBtn">📤 Compartilhar</button>
-            </div>
+        </div>
+
+        <!-- Contêiner da imagem com scroll/zoom -->
+        <div class="viewer-image-wrap" id="viewerImageWrap">
+            <img id="viewerImage" src="" alt="Visualizador" />
+        </div>
+
+        <!-- Barra de ações flutuante (sobre a imagem) -->
+        <div class="viewer-actions-bar" id="viewerActionsBar">
+            <button class="fav-btn" id="viewerFavBtn">
+                <span class="action-icon">⭐</span> Favoritar
+            </button>
+            <button class="edit-btn" id="viewerEditBtn">
+                <span class="action-icon">✏️</span> Editar
+            </button>
+            <button class="del-btn" id="viewerDeleteBtn">
+                <span class="action-icon">🗑️</span> Excluir
+            </button>
+            <button class="share-btn" id="viewerShareBtn">
+                <span class="action-icon">📤</span> Compartilhar
+            </button>
+            <button class="download-btn" id="viewerDownloadBtn">
+                <span class="action-icon">⬇️</span> Baixar
+            </button>
         </div>
     </div>
 
@@ -1958,7 +2018,7 @@
             }
 
             // ============================================================
-            // VIEWER
+            // VIEWER - Melhorias (fullscreen, zoom, ações sobrepostas)
             // ============================================================
             function openViewer(id) {
                 const img = state.images.find(i => i.id === id);
@@ -1967,23 +2027,58 @@
                 const catName = state.categories.find(c => c.id === img.categoria)?.nome || 'Sem categoria';
                 const tagNames = (img.tags || []).map(tid => state.tags.find(t => t.id === tid)?.nome || '').filter(Boolean);
 
+                const viewerEl = document.getElementById('viewer');
                 $('#viewerImage').src = getImageUrl(img.imagem);
                 $('#viewerName').textContent = img.nome || 'Sem nome';
                 $('#viewerMeta').textContent = `${catName} · ${formatDate(img.dataCadastro)}`;
                 $('#viewerTags').innerHTML = tagNames.map(t => `<span class="viewer-tag">#${t}</span>`).join('');
 
                 const favBtn = $('#viewerFavBtn');
-                favBtn.textContent = img.favorito === 1 ? '★ Favorito' : '☆ Favoritar';
-                favBtn.className = img.favorito === 1 ? 'v-btn-fav' : 'v-btn-primary';
+                const isFav = img.favorito === 1;
+                favBtn.innerHTML = `<span class="action-icon">${isFav ? '⭐' : '☆'}</span> ${isFav ? 'Favorito' : 'Favoritar'}`;
+                favBtn.classList.toggle('active', isFav);
 
-                document.getElementById('viewer').classList.add('visible');
+                viewerEl.classList.add('visible');
                 document.body.style.overflow = 'hidden';
+
+                // Ativar fullscreen se suportado
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
             }
 
             function closeViewer() {
                 document.getElementById('viewer').classList.remove('visible');
                 document.body.style.overflow = '';
                 state.viewerImageId = null;
+                // Sair do fullscreen se estiver ativo
+                if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+
+            // ============================================================
+            // DOWNLOAD
+            // ============================================================
+            async function downloadImage(id) {
+                const img = state.images.find(i => i.id === id);
+                if (!img) return;
+                const url = getImageUrl(img.imagem);
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    const ext = blob.type.split('/')[1] || 'jpg';
+                    link.download = `${img.nome || 'imagem'}.${ext}`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                } catch {
+                    // Fallback: abrir em nova aba
+                    window.open(url, '_blank');
+                }
             }
 
             // ============================================================
@@ -2055,7 +2150,6 @@
                 $('#imageFav').checked = false;
                 $('#imageUrlInput').value = '';
                 state.selectedFiles = [];
-                updateTagSelect();
 
                 if (editId) {
                     const img = state.images.find(i => i.id === editId);
@@ -2067,10 +2161,13 @@
                     $('#imageCategory').value = img.categoria || '';
                     $('#imageFav').checked = img.favorito === 1;
                     $('#imageEditId').value = img.id;
+                    // Atualizar tags
+                    updateTagSelect();
                     const tagContainer = $('#imageTagSelect');
                     tagContainer.querySelectorAll('.tag-option').forEach(el => {
                         if ((img.tags || []).includes(el.dataset.id)) el.classList.add('selected');
                     });
+                    // Mostrar preview da imagem atual
                     const preview = $('#uploadPreview');
                     preview.innerHTML = `
                         <div style="position:relative;display:inline-block;">
@@ -2085,7 +2182,9 @@
                 } else {
                     title.textContent = 'Nova imagem';
                     submitBtn.textContent = 'Salvar';
+                    updateTagSelect();
                 }
+
                 document.getElementById('imageModal').classList.add('visible');
                 document.body.style.overflow = 'hidden';
             }
@@ -2528,6 +2627,9 @@
                 });
                 document.getElementById('viewerShareBtn').addEventListener('click', () => {
                     if (state.viewerImageId) shareImage(state.viewerImageId);
+                });
+                document.getElementById('viewerDownloadBtn').addEventListener('click', () => {
+                    if (state.viewerImageId) downloadImage(state.viewerImageId);
                 });
 
                 // Close modals on overlay click
