@@ -1007,7 +1007,7 @@
         }
 
         /* ============================================================
-               VIEWER - Melhorias
+               VIEWER - Melhorias (zoom e compartilhamento)
                ============================================================ */
         .viewer-overlay {
             position: fixed;
@@ -1022,7 +1022,8 @@
             justify-content: center;
             padding: 0;
             animation: fadeIn 0.3s ease;
-            touch-action: none;
+            touch-action: manipulation;
+            /* permite gestos de pinça no container */
         }
 
         .viewer-overlay.visible {
@@ -1053,7 +1054,8 @@
             background: rgba(255, 255, 255, 0.25);
         }
 
-        .viewer-overlay .viewer-image-wrap {
+        /* Container da imagem com scroll e zoom nativo */
+        .viewer-image-wrap {
             flex: 1;
             width: 100%;
             height: 100%;
@@ -1063,21 +1065,29 @@
             overflow: auto;
             -webkit-overflow-scrolling: touch;
             touch-action: pinch-zoom;
+            /* permite zoom com dois dedos */
             user-select: none;
             -webkit-user-select: none;
             padding: 80px 16px 100px;
             /* espaço para botões */
+            cursor: grab;
         }
 
-        .viewer-overlay .viewer-image-wrap img {
+        .viewer-image-wrap:active {
+            cursor: grabbing;
+        }
+
+        .viewer-image-wrap img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
             border-radius: var(--radius-sm);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-            /* permite que o zoom funcione no container */
             touch-action: pinch-zoom;
+            /* permite zoom na imagem também */
+            pointer-events: auto;
+            /* importante para interação */
+            display: block;
         }
 
         /* Barra de ações flutuante sobre a imagem */
@@ -2082,6 +2092,48 @@
             }
 
             // ============================================================
+            // COMPARTILHAR MELHORADO
+            // ============================================================
+            async function shareImage(id) {
+                const img = state.images.find(i => i.id === id);
+                if (!img) return;
+                const url = getImageUrl(img.imagem);
+
+                try {
+                    // Tenta usar a Web Share API com arquivo (suportado em mobile)
+                    if (navigator.share) {
+                        // Se for data URL, tenta converter para blob e compartilhar como arquivo
+                        if (url.startsWith('data:')) {
+                            const response = await fetch(url);
+                            const blob = await response.blob();
+                            const file = new File([blob], `${img.nome || 'imagem'}.jpg`, { type: blob.type });
+                            await navigator.share({
+                                title: img.nome || 'Imagem',
+                                files: [file]
+                            });
+                        } else {
+                            // URL HTTP, compartilha como link
+                            await navigator.share({
+                                title: img.nome || 'Imagem',
+                                url: url
+                            });
+                        }
+                        return;
+                    }
+
+                    // Fallback: copiar link para clipboard
+                    await navigator.clipboard.writeText(url);
+                    showToast('Link copiado para a área de transferência', 'success');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        // Se falhar, tenta baixar a imagem
+                        downloadImage(id);
+                        showToast('Compartilhamento indisponível, download iniciado', 'info');
+                    }
+                }
+            }
+
+            // ============================================================
             // CRUD: IMAGES (with multiple file support)
             // ============================================================
             async function loadImages() {
@@ -2538,21 +2590,6 @@
                         preview.appendChild(indicator);
                     }
                 }
-            }
-
-            // ============================================================
-            // SHARE
-            // ============================================================
-            async function shareImage(id) {
-                const img = state.images.find(i => i.id === id);
-                if (!img) return;
-                try {
-                    const url = getImageUrl(img.imagem);
-                    if (navigator.share) { await navigator.share({ title: img.nome || 'Imagem', url }); } else {
-                        await navigator.clipboard.writeText(url);
-                        showToast('Link copiado', 'success');
-                    }
-                } catch { showToast('Não foi possível compartilhar', 'error'); }
             }
 
             // ============================================================
