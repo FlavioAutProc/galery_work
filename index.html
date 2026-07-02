@@ -1007,7 +1007,7 @@
         }
 
         /* ============================================================
-               VIEWER - Melhorias (zoom e compartilhamento)
+               VIEWER - ZOOM NATIVO (CORRIGIDO)
                ============================================================ */
         .viewer-overlay {
             position: fixed;
@@ -1023,7 +1023,6 @@
             padding: 0;
             animation: fadeIn 0.3s ease;
             touch-action: manipulation;
-            /* permite gestos de pinça no container */
         }
 
         .viewer-overlay.visible {
@@ -1059,18 +1058,14 @@
             flex: 1;
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: auto;
             -webkit-overflow-scrolling: touch;
             touch-action: pinch-zoom;
-            /* permite zoom com dois dedos */
             user-select: none;
             -webkit-user-select: none;
             padding: 80px 16px 100px;
-            /* espaço para botões */
             cursor: grab;
+            display: block;
         }
 
         .viewer-image-wrap:active {
@@ -1078,16 +1073,15 @@
         }
 
         .viewer-image-wrap img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+            width: auto;
+            height: auto;
+            max-width: none;
+            max-height: none;
+            display: block;
             border-radius: var(--radius-sm);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
             touch-action: pinch-zoom;
-            /* permite zoom na imagem também */
             pointer-events: auto;
-            /* importante para interação */
-            display: block;
         }
 
         /* Barra de ações flutuante sobre a imagem */
@@ -1298,6 +1292,29 @@
                 min-height: 100px;
             }
         }
+
+        /* Botões de ação nas configurações */
+        .settings-item .btn-action {
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            font-family: var(--font);
+        }
+        .settings-item .btn-action:active {
+            transform: scale(0.95);
+        }
+        .settings-item .btn-action.primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .settings-item .btn-action.danger {
+            background: var(--danger);
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -1400,6 +1417,32 @@
                             </div>
                         </div>
                         <span class="settings-value" id="settingsTagCount">0</span>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <span class="settings-label">Dados</span>
+                    <!-- Exportar -->
+                    <div class="settings-item">
+                        <div class="settings-left">
+                            <span class="settings-icon">📤</span>
+                            <div class="settings-info">
+                                <div class="settings-title">Baixar todos os dados</div>
+                                <div class="settings-desc">Exportar imagens e metadados (JSON)</div>
+                            </div>
+                        </div>
+                        <button class="btn-action primary" id="exportDataBtn">Exportar</button>
+                    </div>
+                    <!-- Deletar tudo -->
+                    <div class="settings-item">
+                        <div class="settings-left">
+                            <span class="settings-icon">🗑️</span>
+                            <div class="settings-info">
+                                <div class="settings-title">Deletar todos os dados</div>
+                                <div class="settings-desc">Apagar imagens, categorias e tags</div>
+                            </div>
+                        </div>
+                        <button class="btn-action danger" id="deleteAllDataBtn">Deletar</button>
                     </div>
                 </div>
 
@@ -1643,6 +1686,13 @@
                 async putTag(data) { return this._put('tags', data); }
                 async deleteTag(id) { return this._delete('tags', id); }
 
+                // Limpar todas as stores
+                async clearAll() {
+                    await this._clear('images');
+                    await this._clear('categorias');
+                    await this._clear('tags');
+                }
+
                 _getAll(store) {
                     return new Promise((resolve, reject) => {
                         const tx = this.db.transaction(store, 'readonly');
@@ -1680,6 +1730,14 @@
                         const tx = this.db.transaction(store, 'readonly');
                         const req = tx.objectStore(store).index(index).getAll(value);
                         req.onsuccess = () => resolve(req.result || []);
+                        req.onerror = () => reject(req.error);
+                    });
+                }
+                _clear(store) {
+                    return new Promise((resolve, reject) => {
+                        const tx = this.db.transaction(store, 'readwrite');
+                        const req = tx.objectStore(store).clear();
+                        req.onsuccess = () => resolve();
                         req.onerror = () => reject(req.error);
                     });
                 }
@@ -1880,11 +1938,9 @@
                     const categoryImages = state.images.filter(i => i.categoria === c.id);
                     let bgImage = '';
                     if (categoryImages.length > 0) {
-                        // pick a random image
                         const randomImg = categoryImages[Math.floor(Math.random() * categoryImages.length)];
                         bgImage = getImageUrl(randomImg.imagem);
                     }
-                    // Fallback icon if no image
                     const icon = getCategoryIcon(c.nome);
                     const styleAttr = bgImage ? `style="background-image: url('${bgImage}');"` : '';
                     html += `
@@ -1929,7 +1985,7 @@
                     });
                 });
 
-                // Delete slide
+                // Delete slide - REMOVIDA A RESTRIÇÃO DE IMAGENS
                 slider.querySelectorAll('.delete-slide').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
@@ -2028,7 +2084,7 @@
             }
 
             // ============================================================
-            // VIEWER - Melhorias (fullscreen, zoom, ações sobrepostas)
+            // VIEWER - ZOOM NATIVO (CORRIGIDO)
             // ============================================================
             function openViewer(id) {
                 const img = state.images.find(i => i.id === id);
@@ -2061,7 +2117,6 @@
                 document.getElementById('viewer').classList.remove('visible');
                 document.body.style.overflow = '';
                 state.viewerImageId = null;
-                // Sair do fullscreen se estiver ativo
                 if (document.fullscreenElement) {
                     document.exitFullscreen().catch(() => {});
                 }
@@ -2086,13 +2141,12 @@
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
                 } catch {
-                    // Fallback: abrir em nova aba
                     window.open(url, '_blank');
                 }
             }
 
             // ============================================================
-            // COMPARTILHAR MELHORADO
+            // COMPARTILHAR
             // ============================================================
             async function shareImage(id) {
                 const img = state.images.find(i => i.id === id);
@@ -2100,9 +2154,7 @@
                 const url = getImageUrl(img.imagem);
 
                 try {
-                    // Tenta usar a Web Share API com arquivo (suportado em mobile)
                     if (navigator.share) {
-                        // Se for data URL, tenta converter para blob e compartilhar como arquivo
                         if (url.startsWith('data:')) {
                             const response = await fetch(url);
                             const blob = await response.blob();
@@ -2112,7 +2164,6 @@
                                 files: [file]
                             });
                         } else {
-                            // URL HTTP, compartilha como link
                             await navigator.share({
                                 title: img.nome || 'Imagem',
                                 url: url
@@ -2121,12 +2172,10 @@
                         return;
                     }
 
-                    // Fallback: copiar link para clipboard
                     await navigator.clipboard.writeText(url);
                     showToast('Link copiado para a área de transferência', 'success');
                 } catch (err) {
                     if (err.name !== 'AbortError') {
-                        // Se falhar, tenta baixar a imagem
                         downloadImage(id);
                         showToast('Compartilhamento indisponível, download iniciado', 'info');
                     }
@@ -2213,13 +2262,11 @@
                     $('#imageCategory').value = img.categoria || '';
                     $('#imageFav').checked = img.favorito === 1;
                     $('#imageEditId').value = img.id;
-                    // Atualizar tags
                     updateTagSelect();
                     const tagContainer = $('#imageTagSelect');
                     tagContainer.querySelectorAll('.tag-option').forEach(el => {
                         if ((img.tags || []).includes(el.dataset.id)) el.classList.add('selected');
                     });
-                    // Mostrar preview da imagem atual
                     const preview = $('#uploadPreview');
                     preview.innerHTML = `
                         <div style="position:relative;display:inline-block;">
@@ -2257,7 +2304,6 @@
                 const editId = $('#imageEditId').value;
                 const selectedTags = getSelectedTags();
 
-                // If editing, only one image is updated
                 if (editId) {
                     if (!nameBase) { showToast('Informe o nome da imagem', 'error'); return; }
                     let imageData = null;
@@ -2291,25 +2337,20 @@
                     return;
                 }
 
-                // NEW IMAGE: handle multiple files
                 if (!nameBase) { showToast('Informe um nome base para as imagens', 'error'); return; }
 
-                // Check if we have files or URL
                 const urlInput = $('#imageUrlInput').value.trim();
                 let filesToProcess = [];
 
                 if (urlInput && isValidUrl(urlInput)) {
-                    // Single URL image
                     filesToProcess = [{ url: urlInput }];
                 } else if (state.selectedFiles.length > 0) {
-                    // Multiple files
                     filesToProcess = state.selectedFiles;
                 } else {
                     showToast('Selecione uma imagem ou insira uma URL', 'error');
                     return;
                 }
 
-                // Process each file
                 let successCount = 0;
                 for (let i = 0; i < filesToProcess.length; i++) {
                     const file = filesToProcess[i];
@@ -2320,7 +2361,6 @@
                     }
                     try {
                         if (file.url) {
-                            // It's a URL
                             imageData = file.url;
                         } else {
                             imageData = await fileToBase64(file);
@@ -2391,7 +2431,6 @@
                 const data = { id: uid(), nome: name };
                 await state.db.putCategory(data);
                 await refreshAll();
-                // Hide inline add
                 document.getElementById('addCategoryInline').classList.remove('visible');
                 document.getElementById('newCategoryInput').value = '';
                 showToast('Categoria criada!', 'success');
@@ -2429,10 +2468,16 @@
                 showToast(editId ? 'Categoria atualizada!' : 'Categoria criada!', 'success');
             }
 
+            // DELETE CATEGORY - AGORA PERMITE EXCLUIR MESMO COM IMAGENS
             async function deleteCategory(id) {
-                const used = state.images.some(i => i.categoria === id);
-                if (used) { showToast('Categoria em uso por imagens', 'error'); return; }
                 if (!confirm('Excluir esta categoria?')) return;
+                // Remove a categoria das imagens que a usam (opcional: podemos remover a referência)
+                // Para manter a integridade, vamos atualizar as imagens que usam essa categoria, definindo categoria como null
+                const imagesToUpdate = state.images.filter(i => i.categoria === id);
+                for (const img of imagesToUpdate) {
+                    img.categoria = '';
+                    await state.db.putImage(img);
+                }
                 await state.db.deleteCategory(id);
                 if (state.selectedCategoryId === id) state.selectedCategoryId = null;
                 await refreshAll();
@@ -2494,6 +2539,50 @@
             }
 
             // ============================================================
+            // EXPORTAR TODOS OS DADOS
+            // ============================================================
+            async function exportAllData() {
+                try {
+                    const data = {
+                        images: state.images,
+                        categories: state.categories,
+                        tags: state.tags,
+                        exportedAt: new Date().toISOString()
+                    };
+                    const json = JSON.stringify(data, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `galeria_backup_${new Date().toISOString().slice(0,10)}.json`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    showToast('Dados exportados com sucesso!', 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Erro ao exportar dados', 'error');
+                }
+            }
+
+            // ============================================================
+            // DELETAR TODOS OS DADOS
+            // ============================================================
+            async function deleteAllData() {
+                if (!confirm('Tem certeza que deseja apagar TODOS os dados? Esta ação não pode ser desfeita!')) return;
+                if (!confirm('Confirme novamente: todos os dados serão perdidos.')) return;
+                try {
+                    await state.db.clearAll();
+                    await refreshAll();
+                    showToast('Todos os dados foram removidos', 'info');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Erro ao deletar dados', 'error');
+                }
+            }
+
+            // ============================================================
             // FILE & URL UPLOAD
             // ============================================================
             function setupFileUpload() {
@@ -2551,8 +2640,8 @@
                     const valid = files.filter(f => f.type.startsWith('image/'));
                     if (!valid.length) { showToast('Selecione apenas imagens', 'error'); return; }
                     urlInput.value = '';
-                    const toShow = valid.slice(0, 5); // limit to 5 previews
-                    state.selectedFiles = valid; // store all valid files
+                    const toShow = valid.slice(0, 5);
+                    state.selectedFiles = valid;
                     preview.innerHTML = '';
                     toShow.forEach((f, idx) => {
                         const reader = new FileReader();
@@ -2572,7 +2661,6 @@
                                 'position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
                             removeBtn.addEventListener('click', () => {
                                 wrapper.remove();
-                                // Remove from state
                                 state.selectedFiles = state.selectedFiles.filter((_, i) => i !== idx);
                                 if (!state.selectedFiles.length) preview.innerHTML = '';
                             });
@@ -2581,7 +2669,6 @@
                         };
                         reader.readAsDataURL(f);
                     });
-                    // If more than 5, show a small indicator
                     if (valid.length > 5) {
                         const indicator = document.createElement('div');
                         indicator.textContent = `+${valid.length - 5} mais`;
@@ -2669,6 +2756,10 @@
                     if (state.viewerImageId) downloadImage(state.viewerImageId);
                 });
 
+                // Exportar e Deletar dados
+                document.getElementById('exportDataBtn').addEventListener('click', exportAllData);
+                document.getElementById('deleteAllDataBtn').addEventListener('click', deleteAllData);
+
                 // Close modals on overlay click
                 document.querySelectorAll('.modal-overlay').forEach(overlay => {
                     overlay.addEventListener('click', (e) => {
@@ -2687,7 +2778,6 @@
                         if (document.getElementById('categoryModal').classList.contains('visible'))
                             closeCategoryModal();
                         if (document.getElementById('tagModal').classList.contains('visible')) closeTagModal();
-                        // Hide inline add
                         document.getElementById('addCategoryInline').classList.remove('visible');
                     }
                 });
