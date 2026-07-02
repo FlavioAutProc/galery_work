@@ -1007,7 +1007,7 @@
         }
 
         /* ============================================================
-               VIEWER - ZOOM NATIVO (CORRIGIDO)
+               VIEWER - AJUSTADO PARA CABER NA TELA
                ============================================================ */
         .viewer-overlay {
             position: fixed;
@@ -1053,7 +1053,7 @@
             background: rgba(255, 255, 255, 0.25);
         }
 
-        /* Container da imagem com scroll e zoom nativo */
+        /* Container com scroll e zoom */
         .viewer-image-wrap {
             flex: 1;
             width: 100%;
@@ -1065,7 +1065,9 @@
             -webkit-user-select: none;
             padding: 80px 16px 100px;
             cursor: grab;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .viewer-image-wrap:active {
@@ -1073,10 +1075,10 @@
         }
 
         .viewer-image-wrap img {
+            max-width: 100%;
+            max-height: 100%;
             width: auto;
             height: auto;
-            max-width: none;
-            max-height: none;
             display: block;
             border-radius: var(--radius-sm);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
@@ -1084,7 +1086,7 @@
             pointer-events: auto;
         }
 
-        /* Barra de ações flutuante sobre a imagem */
+        /* Barra de ações flutuante */
         .viewer-actions-bar {
             position: fixed;
             bottom: 30px;
@@ -1156,7 +1158,7 @@
             color: #a29bfe;
         }
 
-        /* Informações da imagem (nome, etc) - agora em cima, compacto */
+        /* Informações da imagem (topo) */
         .viewer-info-top {
             position: fixed;
             top: 70px;
@@ -1985,7 +1987,7 @@
                     });
                 });
 
-                // Delete slide - REMOVIDA A RESTRIÇÃO DE IMAGENS
+                // Delete slide - agora sem restrição
                 slider.querySelectorAll('.delete-slide').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
@@ -2084,7 +2086,7 @@
             }
 
             // ============================================================
-            // VIEWER - ZOOM NATIVO (CORRIGIDO)
+            // VIEWER - CORRIGIDO PARA AJUSTAR IMAGEM NA TELA
             // ============================================================
             function openViewer(id) {
                 const img = state.images.find(i => i.id === id);
@@ -2094,7 +2096,14 @@
                 const tagNames = (img.tags || []).map(tid => state.tags.find(t => t.id === tid)?.nome || '').filter(Boolean);
 
                 const viewerEl = document.getElementById('viewer');
-                $('#viewerImage').src = getImageUrl(img.imagem);
+                const imgEl = $('#viewerImage');
+                imgEl.src = getImageUrl(img.imagem);
+                // Garantir que a imagem seja exibida com tamanho adequado
+                imgEl.style.maxWidth = '100%';
+                imgEl.style.maxHeight = '100%';
+                imgEl.style.width = 'auto';
+                imgEl.style.height = 'auto';
+
                 $('#viewerName').textContent = img.nome || 'Sem nome';
                 $('#viewerMeta').textContent = `${catName} · ${formatDate(img.dataCadastro)}`;
                 $('#viewerTags').innerHTML = tagNames.map(t => `<span class="viewer-tag">#${t}</span>`).join('');
@@ -2468,11 +2477,10 @@
                 showToast(editId ? 'Categoria atualizada!' : 'Categoria criada!', 'success');
             }
 
-            // DELETE CATEGORY - AGORA PERMITE EXCLUIR MESMO COM IMAGENS
+            // DELETE CATEGORY - agora permite excluir mesmo com imagens
             async function deleteCategory(id) {
                 if (!confirm('Excluir esta categoria?')) return;
-                // Remove a categoria das imagens que a usam (opcional: podemos remover a referência)
-                // Para manter a integridade, vamos atualizar as imagens que usam essa categoria, definindo categoria como null
+                // Remove a categoria das imagens que a usam
                 const imagesToUpdate = state.images.filter(i => i.categoria === id);
                 for (const img of imagesToUpdate) {
                     img.categoria = '';
